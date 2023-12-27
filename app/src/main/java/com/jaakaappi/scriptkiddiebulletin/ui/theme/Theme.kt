@@ -33,7 +33,7 @@ fun ScriptKiddieBulletinTheme(
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
-        darkTheme -> DarkColorScheme
+//        darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
     val view = LocalView.current

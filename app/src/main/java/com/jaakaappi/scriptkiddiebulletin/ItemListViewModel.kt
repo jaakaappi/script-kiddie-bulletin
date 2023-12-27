@@ -21,7 +21,7 @@ class ItemListViewModel() : ViewModel() {
             println(bestStoriesIdsResponse)
 
             if (bestStoriesIdsResponse.isNotEmpty()) {
-                val ids = bestStoriesIdsResponse.chunked(10)[0]
+                val ids = bestStoriesIdsResponse.chunked(20)[0]
                 val items = ids.map {
                     async {
                         hackerNewsService.getItem(it)

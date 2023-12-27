@@ -78,7 +78,7 @@ fun PostCard(post: Item) {
         ) {
             FlowRow(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
                     text = post.title,
@@ -87,7 +87,7 @@ fun PostCard(post: Item) {
                 )
                 if (!post.url.isNullOrBlank())
                     Text(
-                        text = " (${URI(post.url).host})",
+                        text = "(${URI(post.url).host})",
                         style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.alignByBaseline(),
                     )
