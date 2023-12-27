@@ -7,6 +7,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,12 +20,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.jaakaappi.scriptkiddiebulletin.data.Item
 import com.jaakaappi.scriptkiddiebulletin.ui.theme.CardWhite
 import com.jaakaappi.scriptkiddiebulletin.ui.theme.ScriptKiddieBulletinTheme
+import java.net.URI
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,35 +46,22 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-data class Post(
-    val title: String,
-    val url: String,
-    val user: String,
-    val timestamp: Int,
-    val likes: Int
-)
-
-val posts =
-    arrayOf(
-        Post("Ask HN: why cows fly", "hackernews.com", "jaakaappi", 2, 12),
-        Post("Show HN: dogs fly", "hackernews.com", "jaakaappi", 26, 46)
-    )
-
 @Composable
-fun PostList() {
+fun PostList(itemListViewModel: ItemListViewModel = viewModel()) {
     LazyColumn(
         contentPadding = PaddingValues(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.background(MaterialTheme.colorScheme.background)
     ) {
-        for (post in posts) {
+        for (post in itemListViewModel.bestStoriesItems) {
             item { PostCard(post) }
         }
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun PostCard(post: Post) {
+fun PostCard(post: Item) {
     Row(
         Modifier
             .border(0.5.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
@@ -80,20 +71,33 @@ fun PostCard(post: Post) {
     ) {
         Column(
             Modifier
-                .padding(4.dp)
+                .padding(4.dp),
+            verticalArrangement = Arrangement.spacedBy(
+                4.dp
+            )
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
             ) {
-                Text(text = post.title, style = MaterialTheme.typography.labelLarge)
-                Text(text = " (${post.url})", style = MaterialTheme.typography.labelMedium)
+                Text(
+                    text = post.title,
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.alignByBaseline()
+                )
+                if (!post.url.isNullOrBlank())
+                    Text(
+                        text = " (${URI(post.url).host})",
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.alignByBaseline(),
+                    )
+
             }
             Row {
-                Text(text = "by ${post.user}", style = MaterialTheme.typography.labelMedium)
+                Text(text = "by ${post.by}", style = MaterialTheme.typography.labelMedium)
                 Text(
                     text = " ${
-                        post.timestamp
+                        (System.currentTimeMillis() / 1000 - post.time) / 3600
                     } hours ago", style = MaterialTheme.typography.labelMedium
                 )
             }
