@@ -1,10 +1,13 @@
 package com.jaakaappi.scriptkiddiebulletin
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -27,7 +30,6 @@ import androidx.compose.material.icons.outlined.ArrowCircleUp
 import androidx.compose.material.icons.outlined.Chat
 import androidx.compose.material.icons.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -38,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -91,10 +94,7 @@ fun PostCard(post: Item) {
     ) {
         Column(
             Modifier
-                .padding(4.dp),
-            verticalArrangement = Arrangement.spacedBy(
-                4.dp
-            )
+                .padding(4.dp)
         ) {
             FlowRow(
                 modifier = Modifier
@@ -121,6 +121,7 @@ fun PostCard(post: Item) {
                     } hours ago", style = MaterialTheme.typography.labelMedium
                 )
             }
+            Spacer(modifier = Modifier.height(4.dp))
             FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -134,7 +135,7 @@ fun PostCard(post: Item) {
                         .weight(0.2f, fill = true)
                         .fillMaxHeight(),
                     text = post.score.toString(),
-                    border = true
+                    border = true,
                 )
                 ListCardIconButton(
                     Icons.Outlined.Chat,
@@ -143,23 +144,34 @@ fun PostCard(post: Item) {
                     text = post.descendants.toString(),
                     border = true
                 )
-                ListCardIconButton(
-                    Icons.Outlined.VisibilityOff,
-                    iconContentDescription = "Hide post",
-                    modifier = Modifier.weight(0.2f, fill = true),
-                    border = true
-                )
+
+                val context = LocalContext.current
                 ListCardIconButton(
                     Icons.Outlined.Share,
                     iconContentDescription = "Share link to post",
                     modifier = Modifier
                         .weight(0.2f, fill = true)
                         .fillMaxHeight(),
-                    border = true
+                    border = true,
+                    onClick = {
+                        val shareIntent = Intent.createChooser(Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(
+                                Intent.EXTRA_TEXT,
+                                "https://news.ycombinator.com/item?id=${post.id}"
+                            )
+                            putExtra(Intent.EXTRA_TITLE, "HN: ${post.title}")
+                            type = "text/plain"
+                        }, null)
+                        context.startActivity(shareIntent)
+                    }
                 )
                 ListCardIconButton(
                     Icons.Outlined.OpenInNew, iconContentDescription = "Open link",
                     modifier = Modifier.weight(0.2f, fill = true),
+                    onClick = {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(post.url)))
+                    }
                 )
             }
         }
@@ -174,6 +186,7 @@ fun ListCardIconButton(
     text: String? = null,
     iconSize: Int = 12,
     border: Boolean = false,
+    onClick: (() -> Unit)? = null
 ) {
     var rowModifier = modifier
         .fillMaxHeight()
@@ -188,6 +201,9 @@ fun ListCardIconButton(
                     1 * density
                 )
             }
+
+    if (onClick != null)
+        rowModifier = rowModifier.clickable { onClick() }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
