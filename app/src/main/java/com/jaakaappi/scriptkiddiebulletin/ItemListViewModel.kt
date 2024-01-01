@@ -1,6 +1,7 @@
 package com.jaakaappi.scriptkiddiebulletin
 
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jaakaappi.scriptkiddiebulletin.data.Item
@@ -12,10 +13,17 @@ class ItemListViewModel() : ViewModel() {
     val hackerNewsService = HackerNewsApiCLient.apiService
     var bestStoriesIds = mutableStateListOf<Int>()
     var bestStoriesItems = mutableStateListOf<Item>()
+    val isLoading = mutableStateOf(false)
 
     init {
+        loadStories()
+    }
+
+    fun loadStories() {
         viewModelScope.launch(Dispatchers.IO) {
+            isLoading.value = true
             val bestStoriesIdsResponse = hackerNewsService.getBestStories()
+            isLoading.value = false
             bestStoriesIds.addAll(bestStoriesIds)
             print("best stories ids")
             println(bestStoriesIdsResponse)
