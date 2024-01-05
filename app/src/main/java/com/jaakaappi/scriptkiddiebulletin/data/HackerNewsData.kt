@@ -1,6 +1,6 @@
 package com.jaakaappi.scriptkiddiebulletin.data
 
-data class Item(
+data class HackerNewsItem(
     val id: Int,
     val deleted: Boolean,
     val type: String,

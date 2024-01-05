@@ -1,44 +1,40 @@
 package com.jaakaappi.scriptkiddiebulletin
 
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jaakaappi.scriptkiddiebulletin.data.Item
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import com.jaakaappi.scriptkiddiebulletin.data.HackerNewsItem
+import com.jaakaappi.scriptkiddiebulletin.data.HackerNewsItemRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
-class ItemListViewModel() : ViewModel() {
-    val hackerNewsService = HackerNewsApiCLient.apiService
-    var bestStoriesIds = mutableStateListOf<Int>()
-    var bestStoriesItems = mutableStateListOf<Item>()
+class ItemListViewModel : ViewModel() {
+    // TODO lifecycle state
+    private val hackerNewsService: HackerNewsApiInterface = HackerNewsApiCLient.apiService
+    private val hackerNewsItemRepository = HackerNewsItemRepository.repository
     val isLoading = mutableStateOf(false)
 
+
+    val itemListState: MutableStateFlow<PagingData<HackerNewsItem>> =
+        MutableStateFlow(value = PagingData.empty())
+
     init {
-        loadStories()
+        getBestStories()
     }
 
-    fun loadStories() {
+    fun getBestStories() {
+        isLoading.value = true
         viewModelScope.launch(Dispatchers.IO) {
-            isLoading.value = true
             val bestStoriesIdsResponse = hackerNewsService.getBestStories()
-            isLoading.value = false
-            bestStoriesIds.addAll(bestStoriesIds)
-            print("best stories ids")
             println(bestStoriesIdsResponse)
 
-            if (bestStoriesIdsResponse.isNotEmpty()) {
-                val ids = bestStoriesIdsResponse.chunked(20)[0]
-                val items = ids.map {
-                    async {
-                        hackerNewsService.getItem(it)
-                    }
-                }.map {
-                    it.await()
-                }
-                bestStoriesItems.addAll(items)
-            }
+            hackerNewsItemRepository.getItems(bestStoriesIdsResponse, hackerNewsService)
+                .cachedIn(viewModelScope)
+                .collect { itemListState.value = it }
         }
+        isLoading.value = false
     }
 }

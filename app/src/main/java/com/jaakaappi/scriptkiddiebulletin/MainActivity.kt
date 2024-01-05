@@ -50,7 +50,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.jaakaappi.scriptkiddiebulletin.data.Item
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import com.jaakaappi.scriptkiddiebulletin.data.HackerNewsItem
 import com.jaakaappi.scriptkiddiebulletin.ui.theme.CardWhite
 import com.jaakaappi.scriptkiddiebulletin.ui.theme.ScriptKiddieBulletinTheme
 import com.jaakaappi.scriptkiddiebulletin.ui.theme.TextDarkGrey
@@ -83,8 +85,11 @@ fun PostList(itemListViewModel: ItemListViewModel = viewModel()) {
 
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isLoading,
-        onRefresh = itemListViewModel::loadStories
+        onRefresh = itemListViewModel::getBestStories
     )
+
+    val itemPagingItems: LazyPagingItems<HackerNewsItem> =
+        itemListViewModel.itemListState.collectAsLazyPagingItems()
 
     Box {
         LazyColumn(
@@ -94,8 +99,8 @@ fun PostList(itemListViewModel: ItemListViewModel = viewModel()) {
                 .background(MaterialTheme.colorScheme.background)
                 .pullRefresh(pullRefreshState)
         ) {
-            for (post in itemListViewModel.bestStoriesItems) {
-                item { PostCard(post) }
+            items(itemPagingItems.itemCount) { index ->
+                PostCard(post = itemPagingItems[index]!!)
             }
         }
 
@@ -110,7 +115,7 @@ fun PostList(itemListViewModel: ItemListViewModel = viewModel()) {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun PostCard(post: Item) {
+fun PostCard(post: HackerNewsItem) {
     Row(
         Modifier
             .border(0.5.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
