@@ -125,22 +125,20 @@ fun PostCard(post: HackerNewsItem) {
     ) {
         Column(
             Modifier
-                .padding(4.dp)
+                .padding(8.dp)
         ) {
-            FlowRow(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    .fillMaxWidth()
             ) {
                 Text(
                     text = post.title,
                     style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier.alignByBaseline()
                 )
                 if (!post.url.isNullOrBlank())
                     Text(
                         text = "(${URI(post.url).host})",
                         style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier.alignByBaseline(),
                     )
 
             }
@@ -215,7 +213,7 @@ fun ListCardIconButton(
     modifier: Modifier = Modifier,
     iconContentDescription: String,
     text: String? = null,
-    iconSize: Int = 12,
+    iconSize: Int = 16,
     border: Boolean = false,
     onClick: (() -> Unit)? = null
 ) {

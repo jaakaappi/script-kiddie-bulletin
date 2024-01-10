@@ -12,7 +12,7 @@ class ItemRepository {
         hackerNewsService: HackerNewsApiInterface
     ): Flow<PagingData<HackerNewsItem>> {
         return Pager(
-            config = PagingConfig(pageSize = 30, enablePlaceholders = false),
+            config = PagingConfig(pageSize = 50, enablePlaceholders = false),
             pagingSourceFactory = { HackerNewsPagingSource(itemIds, hackerNewsService) }
         )
             .flow
