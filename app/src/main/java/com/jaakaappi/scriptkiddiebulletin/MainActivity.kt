@@ -50,9 +50,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.jaakaappi.scriptkiddiebulletin.data.HackerNewsItem
+import com.jaakaappi.scriptkiddiebulletin.data.ItemListViewModel
 import com.jaakaappi.scriptkiddiebulletin.ui.theme.CardWhite
 import com.jaakaappi.scriptkiddiebulletin.ui.theme.ScriptKiddieBulletinTheme
 import com.jaakaappi.scriptkiddiebulletin.ui.theme.TextDarkGrey
@@ -65,12 +71,26 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
+            val navController = rememberNavController()
+
             ScriptKiddieBulletinTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    PostList()
+                NavHost(navController = navController, startDestination = "postList") {
+                    composable("postList") {
+                        Surface(
+                            modifier = Modifier.fillMaxSize(),
+                            color = MaterialTheme.colorScheme.background
+                        ) {
+                            PostList(onNavigateToPostScreen = { id ->
+                                navController.navigate(
+                                    "itemScreen/$id"
+                                )
+                            })
+                        }
+                    }
+                    composable(
+                        "itemScreen/{id}",
+                        arguments = listOf(navArgument("id") { type = NavType.IntType })
+                    ) { ItemScreen() }
                 }
             }
         }
@@ -79,13 +99,15 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun PostList(itemListViewModel: ItemListViewModel = viewModel()) {
+fun PostList(
+    itemListViewModel: ItemListViewModel = viewModel(),
+    onNavigateToPostScreen: (id: Int) -> Unit
+) {
 
     val isLoading by itemListViewModel.isLoading
 
     val pullRefreshState = rememberPullRefreshState(
-        refreshing = isLoading,
-        onRefresh = itemListViewModel::getBestStories
+        refreshing = isLoading, onRefresh = itemListViewModel::getBestStories
     )
 
     val itemPagingItems: LazyPagingItems<HackerNewsItem> =
@@ -99,8 +121,29 @@ fun PostList(itemListViewModel: ItemListViewModel = viewModel()) {
                 .background(MaterialTheme.colorScheme.background)
                 .pullRefresh(pullRefreshState)
         ) {
+            // TODO add header that can be scrolled over, try negative padding
+//            item {
+//                Row(
+//                    Modifier
+//                        .background(MaterialTheme.colorScheme.primary)
+//                        .fillMaxWidth(),
+//                    verticalAlignment = Alignment.CenterVertically,
+//                    horizontalArrangement = Arrangement.SpaceBetween
+//                ) {
+//                    Text(text = "Script Kiddie Bulletin")
+//                    IconButton(onClick = {}) {
+//                        Icon(
+//                            Icons.Default.MoreVert, ""
+//                        )
+//                    }
+//                }
+//            }
+
             items(itemPagingItems.itemCount) { index ->
-                PostCard(post = itemPagingItems[index]!!)
+                PostCard(
+                    post = itemPagingItems[index]!!,
+                    onNavigateToPostScreen = onNavigateToPostScreen
+                )
             }
         }
 
@@ -110,12 +153,14 @@ fun PostList(itemListViewModel: ItemListViewModel = viewModel()) {
             modifier = Modifier.align(Alignment.TopCenter)
         )
     }
-
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun PostCard(post: HackerNewsItem) {
+fun PostCard(
+    post: HackerNewsItem,
+    onNavigateToPostScreen: (id: Int) -> Unit
+) {
     Row(
         Modifier
             .border(0.5.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp))
@@ -124,29 +169,26 @@ fun PostCard(post: HackerNewsItem) {
             )
     ) {
         Column(
-            Modifier
-                .padding(8.dp)
+            Modifier.padding(8.dp)
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = post.title,
+                    text = post.title!!,
                     style = MaterialTheme.typography.labelLarge,
                 )
-                if (!post.url.isNullOrBlank())
-                    Text(
-                        text = "(${URI(post.url).host})",
-                        style = MaterialTheme.typography.labelMedium,
-                    )
+                if (!post.url.isNullOrBlank()) Text(
+                    text = "(${URI(post.url).host})",
+                    style = MaterialTheme.typography.labelMedium,
+                )
 
             }
             Row {
                 Text(text = "by ${post.by}", style = MaterialTheme.typography.labelMedium)
                 Text(
                     text = " ${
-                        (System.currentTimeMillis() / 1000 - post.time) / 3600
+                        (System.currentTimeMillis() / 1000 - post.time!!) / 3600
                     } hours ago", style = MaterialTheme.typography.labelMedium
                 )
             }
@@ -171,12 +213,12 @@ fun PostCard(post: HackerNewsItem) {
                     iconContentDescription = "Show comments",
                     modifier = Modifier.weight(0.2f, fill = true),
                     text = post.descendants.toString(),
-                    border = true
+                    border = true,
+                    onClick = { onNavigateToPostScreen(post.id) }
                 )
 
                 val context = LocalContext.current
-                ListCardIconButton(
-                    Icons.Outlined.Share,
+                ListCardIconButton(Icons.Outlined.Share,
                     iconContentDescription = "Share link to post",
                     modifier = Modifier
                         .weight(0.2f, fill = true)
@@ -186,22 +228,19 @@ fun PostCard(post: HackerNewsItem) {
                         val shareIntent = Intent.createChooser(Intent().apply {
                             action = Intent.ACTION_SEND
                             putExtra(
-                                Intent.EXTRA_TEXT,
-                                "https://news.ycombinator.com/item?id=${post.id}"
+                                Intent.EXTRA_TEXT, "https://news.ycombinator.com/item?id=${post.id}"
                             )
                             putExtra(Intent.EXTRA_TITLE, "HN: ${post.title}")
                             type = "text/plain"
                         }, null)
                         context.startActivity(shareIntent)
-                    }
-                )
-                ListCardIconButton(
-                    Icons.Outlined.OpenInNew, iconContentDescription = "Open link",
+                    })
+                ListCardIconButton(Icons.Outlined.OpenInNew,
+                    iconContentDescription = "Open link",
                     modifier = Modifier.weight(0.2f, fill = true),
                     onClick = {
                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(post.url)))
-                    }
-                )
+                    })
             }
         }
     }
@@ -217,42 +256,31 @@ fun ListCardIconButton(
     border: Boolean = false,
     onClick: (() -> Unit)? = null
 ) {
-    var rowModifier = modifier
-        .fillMaxHeight()
+    var rowModifier = modifier.fillMaxHeight()
 
-    if (border)
-        rowModifier = rowModifier
-            .drawBehind {
-                drawLine(
-                    TextLightGrey,
-                    Offset(size.width, 0f),
-                    Offset(size.width, size.height),
-                    1 * density
-                )
-            }
+    if (border) rowModifier = rowModifier.drawBehind {
+        drawLine(
+            TextLightGrey, Offset(size.width, 0f), Offset(size.width, size.height), 1 * density
+        )
+    }
 
-    if (onClick != null)
-        rowModifier = rowModifier.clickable { onClick() }
+    if (onClick != null) rowModifier = rowModifier.clickable { onClick() }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
-        modifier = rowModifier
-            .fillMaxWidth()
+        modifier = rowModifier.fillMaxWidth()
     ) {
         Icon(
             imageVector,
             iconContentDescription,
-            modifier = Modifier
-                .size(iconSize.dp),
+            modifier = Modifier.size(iconSize.dp),
             tint = TextDarkGrey
         )
         if (!text.isNullOrBlank()) {
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = text,
-                style = MaterialTheme.typography.bodyMedium,
-                color = TextDarkGrey
+                text = text, style = MaterialTheme.typography.bodyMedium, color = TextDarkGrey
             )
         }
 
@@ -264,10 +292,9 @@ fun ListCardIconButton(
 fun GreetingPreview() {
     ScriptKiddieBulletinTheme {
         Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
+            modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
         ) {
-            PostList()
+//            PostList()
         }
     }
 }

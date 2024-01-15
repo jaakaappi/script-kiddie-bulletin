@@ -4,6 +4,7 @@ import androidx.core.math.MathUtils.clamp
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.jaakaappi.scriptkiddiebulletin.HackerNewsApiInterface
+import com.jaakaappi.scriptkiddiebulletin.data.HackerNewsItemRepository.repository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
@@ -40,6 +41,8 @@ class HackerNewsPagingSource(
                 it.await()
             }
         }
+
+        repository.addFetchedItems(items)
 
         return LoadResult.Page(
             data = items,

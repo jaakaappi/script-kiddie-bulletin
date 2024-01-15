@@ -7,7 +7,21 @@ import com.jaakaappi.scriptkiddiebulletin.HackerNewsApiInterface
 import kotlinx.coroutines.flow.Flow
 
 class ItemRepository {
-    fun getItems(
+    private var fetchedItems: List<HackerNewsItem> = listOf()
+
+    fun getFetchedItem(id: Int): HackerNewsItem? {
+        return fetchedItems.find { it.id == id }
+    }
+
+    fun getFetchedItems(): List<HackerNewsItem> {
+        return fetchedItems
+    }
+
+    fun addFetchedItems(newItems: List<HackerNewsItem>) {
+        fetchedItems = (fetchedItems + newItems).distinctBy { it.id }
+    }
+
+    fun getPagedItems(
         itemIds: List<Int>,
         hackerNewsService: HackerNewsApiInterface
     ): Flow<PagingData<HackerNewsItem>> {
