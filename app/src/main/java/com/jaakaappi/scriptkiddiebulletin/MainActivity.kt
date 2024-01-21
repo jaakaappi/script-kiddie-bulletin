@@ -40,7 +40,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -55,6 +54,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.jaakaappi.scriptkiddiebulletin.data.HackerNewsItem
@@ -104,22 +104,24 @@ fun PostList(
     onNavigateToPostScreen: (id: Int) -> Unit
 ) {
 
-    val isLoading by itemListViewModel.isLoading
-
-    val pullRefreshState = rememberPullRefreshState(
-        refreshing = isLoading, onRefresh = itemListViewModel::getBestStories
-    )
-
     val itemPagingItems: LazyPagingItems<HackerNewsItem> =
         itemListViewModel.itemListState.collectAsLazyPagingItems()
 
-    Box {
+    val isLoading =
+        itemPagingItems.loadState.source.refresh == LoadState.Loading || itemListViewModel.areItemIdsLoading.value
+
+    val pullRefreshState = rememberPullRefreshState(
+        refreshing = isLoading,
+        onRefresh = itemListViewModel::refresh
+    )
+
+
+    Box(Modifier.pullRefresh(pullRefreshState)) {
         LazyColumn(
             contentPadding = PaddingValues(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.background)
-                .pullRefresh(pullRefreshState)
         ) {
             // TODO add header that can be scrolled over, try negative padding
 //            item {
@@ -148,7 +150,7 @@ fun PostList(
         }
 
         PullRefreshIndicator(
-            refreshing = itemListViewModel.isLoading.value,
+            refreshing = isLoading,
             state = pullRefreshState,
             modifier = Modifier.align(Alignment.TopCenter)
         )

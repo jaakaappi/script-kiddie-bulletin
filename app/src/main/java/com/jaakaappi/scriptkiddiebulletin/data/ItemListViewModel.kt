@@ -15,26 +15,32 @@ class ItemListViewModel : ViewModel() {
     // TODO lifecycle state
     private val hackerNewsService: HackerNewsApiInterface = HackerNewsApiCLient.apiService
     private val hackerNewsItemRepository = HackerNewsItemRepository.repository
-    val isLoading = mutableStateOf(true)
+    var areItemIdsLoading = mutableStateOf(true)
 
 
     val itemListState: MutableStateFlow<PagingData<HackerNewsItem>> =
         MutableStateFlow(value = PagingData.empty())
 
     init {
+        refresh()
+    }
+
+    fun refresh() {
+        areItemIdsLoading.value = true
         getBestStories()
     }
 
     fun getBestStories() {
-        isLoading.value = true
         viewModelScope.launch(Dispatchers.IO) {
             val bestStoriesIdsResponse = hackerNewsService.getBestStories()
             println(bestStoriesIdsResponse)
 
             hackerNewsItemRepository.getPagedItems(bestStoriesIdsResponse, hackerNewsService)
                 .cachedIn(viewModelScope)
-                .collect { itemListState.value = it }
+                .collect {
+                    itemListState.value = it
+                    launch { areItemIdsLoading.value = false }
+                }
         }
-        isLoading.value = false
     }
 }
