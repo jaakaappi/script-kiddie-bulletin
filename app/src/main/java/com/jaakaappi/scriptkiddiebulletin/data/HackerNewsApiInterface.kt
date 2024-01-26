@@ -1,6 +1,5 @@
-package com.jaakaappi.scriptkiddiebulletin
+package com.jaakaappi.scriptkiddiebulletin.data
 
-import com.jaakaappi.scriptkiddiebulletin.data.HackerNewsItem
 import retrofit2.http.GET
 import retrofit2.http.Path
 

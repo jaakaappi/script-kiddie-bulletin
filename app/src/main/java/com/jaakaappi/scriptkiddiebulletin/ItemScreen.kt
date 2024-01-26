@@ -139,7 +139,7 @@ fun ItemScreenItemCard(item: HackerNewsItem) {
                     .height(IntrinsicSize.Min),
                 horizontalArrangement = Arrangement.Center
             ) {
-                ListCardIconButton(
+                ItemCardIconButton(
                     Icons.Outlined.ArrowCircleUp,
                     iconContentDescription = "Upvote",
                     modifier = Modifier
@@ -150,7 +150,7 @@ fun ItemScreenItemCard(item: HackerNewsItem) {
                 )
 
                 val context = LocalContext.current
-                ListCardIconButton(
+                ItemCardIconButton(
                     Icons.Outlined.Share,
                     iconContentDescription = "Share link to post",
                     modifier = Modifier
@@ -168,7 +168,7 @@ fun ItemScreenItemCard(item: HackerNewsItem) {
                         }, null)
                         context.startActivity(shareIntent)
                     })
-                ListCardIconButton(
+                ItemCardIconButton(
                     Icons.Outlined.OpenInNew,
                     iconContentDescription = "Open link",
                     modifier = Modifier.weight(0.2f, fill = true),
