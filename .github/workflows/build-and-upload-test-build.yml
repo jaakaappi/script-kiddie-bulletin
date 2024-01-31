@@ -23,6 +23,15 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew bundle
+
+    - name: The hecks going on
+      run: | 
+        ls -la ./
+        ls -la ./app
+        ls -la ./app/build
+        ls -la ./app/build/outputs
+        ls -la ./app/build/outputs/bundle
+        ls -la ./app/build/outputs/bundle/release
       
     - uses: r0adkll/sign-android-release@v1
       name: Sign app APK
