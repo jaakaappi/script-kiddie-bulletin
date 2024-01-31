@@ -58,7 +58,8 @@ class ItemScreenViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
                 }.map {
                     it.await()
                 }
-            }.filter { it.type == "comment" || !it.text.isNullOrBlank() }.toMutableList()
+            }.filter { it.type == "comment" && !it.text.isNullOrBlank() && it.deleted == null && it.dead == null }
+                .toMutableList()
 
             println(newKids)
 

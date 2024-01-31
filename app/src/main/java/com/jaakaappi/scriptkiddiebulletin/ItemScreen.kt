@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowCircleUp
 import androidx.compose.material.icons.outlined.OpenInNew
@@ -32,15 +33,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.google.android.material.textview.MaterialTextView
 import com.jaakaappi.scriptkiddiebulletin.data.HackerNewsItem
 import com.jaakaappi.scriptkiddiebulletin.ui.theme.CardWhite
+import com.jaakaappi.scriptkiddiebulletin.ui.theme.TextDarkGrey
 import java.net.URI
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ItemScreen(itemScreenViewModel: ItemScreenViewModel = viewModel()) {
     val item by itemScreenViewModel.item.collectAsState()
@@ -56,7 +60,7 @@ fun ItemScreen(itemScreenViewModel: ItemScreenViewModel = viewModel()) {
         Column(
             modifier = Modifier.padding(8.dp)
         ) {
-            if (item != null) {
+            item?.let {
                 ItemScreenItemCard(item!!)
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(text = if (!item!!.kids.isNullOrEmpty()) "${item!!.kids!!.size} comments" else "No comments")
@@ -65,7 +69,7 @@ fun ItemScreen(itemScreenViewModel: ItemScreenViewModel = viewModel()) {
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        Spacer(modifier = Modifier.height(32.dp))
+                        Spacer(modifier = Modifier.height(64.dp))
                         CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     }
                 } else if (!item!!.kids.isNullOrEmpty()) {
@@ -82,17 +86,16 @@ fun ItemScreen(itemScreenViewModel: ItemScreenViewModel = viewModel()) {
                                     .padding(8.dp)
                                     .fillMaxWidth()
                             ) {
-                                Text(text = "${kid.by} asd ago")
-                                AndroidView(
-                                    factory = { MaterialTextView(it) },
-                                    update = { it.text = spannedText }
-                                )
+                                Text(text = "${kid.by}${kid.time?.let { timestampToTimeString(kid.time) }}")
+                                Text(buildAnnotatedString {
+                                    withStyle(style = SpanStyle(TextDarkGrey)) {
+                                        append(spannedText)
+                                    }
+                                })
                             }
                         }
                     }
                 }
-            } else {
-                Text(text = "Item was null")
             }
         }
     }
@@ -114,10 +117,12 @@ fun ItemScreenItemCard(item: HackerNewsItem) {
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    text = item.title ?: "",
-                    style = MaterialTheme.typography.labelLarge,
-                )
+                item.title?.let {
+                    Text(
+                        text = item.title,
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
                 if (!item.url.isNullOrBlank()) Text(
                     text = "(${URI(item.url).host})",
                     style = MaterialTheme.typography.labelMedium,
@@ -126,11 +131,13 @@ fun ItemScreenItemCard(item: HackerNewsItem) {
             }
             Row {
                 Text(text = "by ${item.by}", style = MaterialTheme.typography.labelMedium)
-                Text(
-                    text = " ${
-                        (System.currentTimeMillis() / 1000 - item.time!!) / 3600
-                    } hours ago", style = MaterialTheme.typography.labelMedium
-                )
+                item.time?.let {
+                    Text(
+                        text =
+                        timestampToTimeString(item.time),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(4.dp))
             FlowRow(

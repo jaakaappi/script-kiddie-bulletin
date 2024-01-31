@@ -71,7 +71,6 @@ fun ItemList(
         onRefresh = itemListViewModel::refresh
     )
 
-
     Box(Modifier.pullRefresh(pullRefreshState)) {
         LazyColumn(
             contentPadding = PaddingValues(8.dp),
@@ -145,11 +144,12 @@ fun ItemCard(
             }
             Row {
                 Text(text = "by ${item.by}", style = MaterialTheme.typography.labelMedium)
-                Text(
-                    text = " ${
-                        (System.currentTimeMillis() / 1000 - item.time!!) / 3600
-                    } hours ago", style = MaterialTheme.typography.labelMedium
-                )
+                item.time?.let {
+                    Text(
+                        text = timestampToTimeString(item.time),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(4.dp))
             FlowRow(
