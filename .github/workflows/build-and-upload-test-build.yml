@@ -11,9 +11,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: set up JDK 17
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
@@ -23,14 +23,6 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew bundle
-
-    - name: The hecks going on
-      run: | 
-        ls -la ./
-        ls -la ./app
-        ls -la ./app/build
-        ls -la ./app/build/outputs
-        ls -la ./app/build/outputs/bundle
         ls -la ./app/build/outputs/bundle/release
       
     - uses: r0adkll/sign-android-release@v1
@@ -38,7 +30,7 @@ jobs:
       # ID used to access action output
       id: sign_app
       with:
-        releaseDirectory: ./app/build/outputs/bundle/release/app-release.aab
+        releaseDirectory: ./app/build/outputs/bundle/release
         signingKeyBase64: ${{ secrets.SIGNING_KEY }}
         alias: ${{ secrets.ALIAS }}
         keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
