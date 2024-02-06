@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    namespace = "com.jaakaappi.scriptkiddiebulletin"
+    namespace = "com.kaappi.scriptkiddiebulletin"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.jaakaappi.scriptkiddiebulletin"
-        minSdk = 26
+        applicationId = "com.kaappi.scriptkiddiebulletin"
+        minSdk = 28
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "0.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

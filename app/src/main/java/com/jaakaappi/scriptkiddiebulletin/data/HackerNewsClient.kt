@@ -1,4 +1,4 @@
-package com.jaakaappi.scriptkiddiebulletin.data
+package com.kaappi.scriptkiddiebulletin.data
 
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -13,7 +13,7 @@ object RetrofitClient {
             .build()
 }
 
-object HackerNewsApiCLient {
+object HackerNewsApiClient {
     val apiService: HackerNewsApiInterface =
         RetrofitClient.getClient().create(HackerNewsApiInterface::class.java)
 }

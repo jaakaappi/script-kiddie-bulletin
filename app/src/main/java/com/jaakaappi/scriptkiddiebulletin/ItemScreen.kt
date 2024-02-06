@@ -1,7 +1,9 @@
-package com.jaakaappi.scriptkiddiebulletin
+package com.kaappi.scriptkiddiebulletin
 
 import android.content.Intent
 import android.net.Uri
+import android.text.method.LinkMovementMethod
+import android.widget.TextView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -32,16 +34,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.text.HtmlCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.jaakaappi.scriptkiddiebulletin.data.HackerNewsItem
-import com.jaakaappi.scriptkiddiebulletin.ui.theme.CardWhite
-import com.jaakaappi.scriptkiddiebulletin.ui.theme.TextDarkGrey
+import com.kaappi.scriptkiddiebulletin.data.HackerNewsItem
+import com.kaappi.scriptkiddiebulletin.ui.theme.CardWhite
+import com.kaappi.scriptkiddiebulletin.ui.theme.TextBlack
 import java.net.URI
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -78,20 +80,32 @@ fun ItemScreen(itemScreenViewModel: ItemScreenViewModel = viewModel()) {
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         items(kids) { kid ->
-                            val spannedText = HtmlCompat.fromHtml(kid.text ?: "", 0)
-
-                            Column(
-                                modifier = Modifier
-                                    .background(CardWhite)
-                                    .padding(8.dp)
-                                    .fillMaxWidth()
-                            ) {
-                                Text(text = "${kid.by}${kid.time?.let { timestampToTimeString(kid.time) }}")
-                                Text(buildAnnotatedString {
-                                    withStyle(style = SpanStyle(TextDarkGrey)) {
-                                        append(spannedText)
-                                    }
-                                })
+                            if (!kid.text.isNullOrEmpty()) {
+                                Column(
+                                    modifier = Modifier
+                                        .background(CardWhite)
+                                        .padding(8.dp)
+                                        .fillMaxWidth()
+                                ) {
+                                    Text(
+                                        style = MaterialTheme.typography.labelMedium,
+                                        text = "${kid.by}${kid.time?.let { timestampToTimeString(kid.time) }}"
+                                    )
+                                    AndroidView(
+                                        factory = { context ->
+                                            TextView(context)
+                                        },
+                                        update = {
+                                            it.text = HtmlCompat.fromHtml(
+                                                kid.text,
+                                                HtmlCompat.FROM_HTML_MODE_COMPACT
+                                            )
+                                            it.movementMethod = LinkMovementMethod.getInstance()
+                                            it.setTextColor(TextBlack.toArgb())
+                                            it.textSize = 14.sp.value
+                                        }
+                                    )
+                                }
                             }
                         }
                     }

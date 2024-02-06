@@ -1,4 +1,4 @@
-package com.jaakaappi.scriptkiddiebulletin.data
+package com.kaappi.scriptkiddiebulletin.data
 
 // TODO figure out which stuff can be null
 data class HackerNewsItem(

@@ -1,9 +1,9 @@
-package com.jaakaappi.scriptkiddiebulletin.data
+package com.kaappi.scriptkiddiebulletin.data
 
 import androidx.core.math.MathUtils.clamp
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import com.jaakaappi.scriptkiddiebulletin.data.HackerNewsItemRepository.repository
+import com.kaappi.scriptkiddiebulletin.data.HackerNewsItemRepository.repository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext

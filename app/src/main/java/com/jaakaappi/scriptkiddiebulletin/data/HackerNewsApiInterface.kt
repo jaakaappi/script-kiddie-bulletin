@@ -1,4 +1,4 @@
-package com.jaakaappi.scriptkiddiebulletin.data
+package com.kaappi.scriptkiddiebulletin.data
 
 import retrofit2.http.GET
 import retrofit2.http.Path

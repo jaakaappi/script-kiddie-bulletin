@@ -1,4 +1,4 @@
-package com.jaakaappi.scriptkiddiebulletin
+package com.kaappi.scriptkiddiebulletin
 
 fun timestampToTimeString(timestamp: Int): String {
     val minutes = (System.currentTimeMillis() / 1000 - timestamp) / 60

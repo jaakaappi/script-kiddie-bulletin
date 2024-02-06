@@ -1,4 +1,4 @@
-package com.jaakaappi.scriptkiddiebulletin.ui.theme
+package com.kaappi.scriptkiddiebulletin.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

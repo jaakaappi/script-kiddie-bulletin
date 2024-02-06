@@ -1,12 +1,12 @@
-package com.jaakaappi.scriptkiddiebulletin
+package com.kaappi.scriptkiddiebulletin
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jaakaappi.scriptkiddiebulletin.data.HackerNewsApiCLient
-import com.jaakaappi.scriptkiddiebulletin.data.HackerNewsApiInterface
-import com.jaakaappi.scriptkiddiebulletin.data.HackerNewsItem
-import com.jaakaappi.scriptkiddiebulletin.data.HackerNewsItemRepository.repository
+import com.kaappi.scriptkiddiebulletin.data.HackerNewsApiClient
+import com.kaappi.scriptkiddiebulletin.data.HackerNewsApiInterface
+import com.kaappi.scriptkiddiebulletin.data.HackerNewsItem
+import com.kaappi.scriptkiddiebulletin.data.HackerNewsItemRepository.repository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class ItemScreenViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
-    private val hackerNewsService: HackerNewsApiInterface = HackerNewsApiCLient.apiService
+    private val hackerNewsService: HackerNewsApiInterface = HackerNewsApiClient.apiService
 
     val item = MutableStateFlow<HackerNewsItem?>(null)
     val commentsAreLoading = MutableStateFlow(true)

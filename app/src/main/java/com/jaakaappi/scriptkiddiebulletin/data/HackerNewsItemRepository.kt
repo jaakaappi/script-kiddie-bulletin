@@ -1,4 +1,4 @@
-package com.jaakaappi.scriptkiddiebulletin.data
+package com.kaappi.scriptkiddiebulletin.data
 
 import androidx.paging.Pager
 import androidx.paging.PagingConfig

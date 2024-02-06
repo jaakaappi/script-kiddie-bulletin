@@ -1,4 +1,4 @@
-package com.jaakaappi.scriptkiddiebulletin.ui.theme
+package com.kaappi.scriptkiddiebulletin.ui.theme
 
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme

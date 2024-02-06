@@ -1,4 +1,4 @@
-package com.jaakaappi.scriptkiddiebulletin
+package com.kaappi.scriptkiddiebulletin
 
 import android.content.Intent
 import android.net.Uri
@@ -21,11 +21,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowCircleUp
 import androidx.compose.material.icons.outlined.Chat
+import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
@@ -35,9 +38,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -46,10 +53,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.jaakaappi.scriptkiddiebulletin.data.HackerNewsItem
-import com.jaakaappi.scriptkiddiebulletin.ui.theme.CardWhite
-import com.jaakaappi.scriptkiddiebulletin.ui.theme.TextDarkGrey
-import com.jaakaappi.scriptkiddiebulletin.ui.theme.TextLightGrey
+import com.kaappi.scriptkiddiebulletin.data.HackerNewsItem
+import com.kaappi.scriptkiddiebulletin.ui.theme.CardWhite
+import com.kaappi.scriptkiddiebulletin.ui.theme.TextDarkGrey
+import com.kaappi.scriptkiddiebulletin.ui.theme.TextLightGrey
+import kotlinx.coroutines.launch
 import java.net.URI
 
 
@@ -71,8 +79,14 @@ fun ItemList(
         onRefresh = itemListViewModel::refresh
     )
 
+    val itemListState = rememberLazyListState()
+    val hasScrolledPastFirstItem =
+        remember { derivedStateOf { itemListState.firstVisibleItemIndex != 0 } }
+    val coroutineScope = rememberCoroutineScope()
+
     Box(Modifier.pullRefresh(pullRefreshState)) {
         LazyColumn(
+            state = itemListState,
             contentPadding = PaddingValues(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
@@ -96,19 +110,47 @@ fun ItemList(
 //                }
 //            }
 
-            items(itemPagingItems.itemCount) { index ->
-                ItemCard(
-                    item = itemPagingItems[index]!!,
-                    onNavigateToItemScreen = onNavigateToItemScreen
-                )
+            for (i in 0..<itemPagingItems.itemCount step 30) {
+                items(30, { index -> itemPagingItems[index]!!.id }) { index ->
+                    ItemCard(
+                        item = itemPagingItems[index]!!,
+                        onNavigateToItemScreen = onNavigateToItemScreen
+                    )
+                }
+                item {
+                    Text(
+                        style = MaterialTheme.typography.bodyMedium,
+                        text = "Page ${(i / 30) + 1}"
+                    )
+                }
             }
         }
-
         PullRefreshIndicator(
             refreshing = isLoading,
             state = pullRefreshState,
             modifier = Modifier.align(Alignment.TopCenter)
         )
+        if (hasScrolledPastFirstItem.value) {
+            IconButton(modifier = Modifier
+                .padding(8.dp)
+                .shadow(8.dp)
+                .background(CardWhite)
+                .border(
+                    0.5.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(4.dp)
+                )
+                .size(48.dp)
+                .align(Alignment.BottomEnd),
+                onClick = {
+                    coroutineScope.launch {
+                        itemListState.animateScrollToItem(
+                            0,
+                            0
+                        )
+                    }
+                }) {
+                Icon(Icons.Outlined.KeyboardArrowUp, contentDescription = "")
+            }
+        }
     }
 }
 

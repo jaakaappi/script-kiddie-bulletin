@@ -1,4 +1,4 @@
-package com.jaakaappi.scriptkiddiebulletin
+package com.kaappi.scriptkiddiebulletin
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -14,7 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.jaakaappi.scriptkiddiebulletin.ui.theme.ScriptKiddieBulletinTheme
+import com.kaappi.scriptkiddiebulletin.ui.theme.ScriptKiddieBulletinTheme
 
 
 class MainActivity : ComponentActivity() {
